@@ -1,11 +1,29 @@
-name: Build, Deploy, and Test ECR Image
+name: Analyze, Build, Deploy, and Test ECR Image
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
+
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4  # Update to the latest version
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2  # Update to the latest version
+        with:
+          languages: python
+
+      #- name: Perform CodeQL Analysis
+      #  uses: github/codeql-action/analyze@v2
+
   build-and-push:
     runs-on: ubuntu-latest
 
