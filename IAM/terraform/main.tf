@@ -2,49 +2,58 @@ provider "aws" {
   region = var.region
 }
 
+data "aws_caller_identity" "current" {}
+
 resource "aws_iam_group" "github_actions_group" {
-  provider = aws.default
-  name     = "github-actions-group"
+  name = "github-actions-group"
+}
+
+data "aws_iam_policy" "existing_ecr_policy" {
+  arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/gha-ecr-policy"
+}
+
+data "aws_iam_policy" "existing_assuming_policy" {
+  arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/gha-assuming-policy"
+}
+
+data "aws_iam_policy" "existing_trust_policy" {
+  arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/gha-trust-policy"
 }
 
 resource "aws_iam_policy" "ecr_policy" {
-  provider    = aws.default
   name        = "gha-ecr-policy"
   path        = "/"
   description = "Policy for ECR access"
-  policy      = file("../terraform/gha-ecr-policy.json")
-}
-
-resource "aws_iam_group_policy_attachment" "ecr_policy_attachment" {
-  provider  = aws.default
-  group     = aws_iam_group.github_actions_group.name
-  policy_arn = aws_iam_policy.ecr_policy.arn
+  policy      = file("gha-ecr-policy.json")
 }
 
 resource "aws_iam_policy" "assuming_policy" {
-  provider    = aws.default
   name        = "gha-assuming-policy"
   path        = "/"
   description = "Policy for assuming roles"
-  policy      = file("../terraform/gha-assuming-policy.json")
-}
-
-resource "aws_iam_group_policy_attachment" "assuming_policy_attachment" {
-  provider  = aws.default
-  group     = aws_iam_group.github_actions_group.name
-  policy_arn = aws_iam_policy.assuming_policy.arn
+  policy      = file("gha-assuming-policy.json")
 }
 
 resource "aws_iam_policy" "trust_policy" {
   name        = "gha-trust-policy"
   path        = "/"
   description = "Trust policy"
-  policy      = file("../terraform/gha-trust-policy.json")
+  policy      = file("gha-trust-policy.json")
+}
+
+resource "aws_iam_group_policy_attachment" "ecr_policy_attachment" {
+  group      = aws_iam_group.github_actions_group.name
+  policy_arn = coalesce(aws_iam_policy.ecr_policy.arn, data.aws_iam_policy.existing_ecr_policy.arn)
+}
+
+resource "aws_iam_group_policy_attachment" "assuming_policy_attachment" {
+  group      = aws_iam_group.github_actions_group.name
+  policy_arn = coalesce(aws_iam_policy.assuming_policy.arn, data.aws_iam_policy.existing_assuming_policy.arn)
 }
 
 resource "aws_iam_group_policy_attachment" "trust_policy_attachment" {
   group      = aws_iam_group.github_actions_group.name
-  policy_arn = aws_iam_policy.trust_policy.arn
+  policy_arn = coalesce(aws_iam_policy.trust_policy.arn, data.aws_iam_policy.existing_trust_policy.arn)
 }
 
 resource "null_resource" "create_ecr_repository" {

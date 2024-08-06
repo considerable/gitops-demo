@@ -4,9 +4,10 @@
     {
       "Effect": "Allow",
       "Action": [
+        "ecr:BatchDeleteImage",
         "ecr:GetAuthorizationToken"
       ],
-      "Resource": "*"
+      "Resource": "arn:aws:ecr::757996166630:repository/platform-mvp-ecr"
     }
   ]
 }

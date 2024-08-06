@@ -13,6 +13,9 @@ These resources are specifically designed to support a GitHub Actions workflow f
 ├── main.tf                         # Main Terraform configuration
 ├── output.tf                       # Outputs the IAM group ARN
 ├── provider.tf                     # AWS provider configuration
+├── terraform-import.sh            # Script for importing existing resources
+├── terraform.tfstate               # Terraform state file
+├── terraform.tfstate.backup        # Terraform state backup file
 └── variables.tf                    # Variables for Terraform configuration
 ```
 
@@ -40,6 +43,9 @@ Specifies the AWS region for the provider.
 ### 7. `variables.tf`
 Defines the `region` variable used to set the AWS region.
 
+### 8. `terraform-import.sh`
+Script to import existing IAM group and policies into Terraform state if they already exist.
+
 ### Usage Instructions
 
 1. **Install Terraform**: Make sure you have Terraform installed on your machine.
@@ -49,13 +55,19 @@ Defines the `region` variable used to set the AWS region.
    terraform init
    ```
 
-3. **Apply the Terraform Configuration**:
+3. **Import Existing Resources** (if they already exist):
+   ```bash
+   bash terraform-import.sh
+   ```
+   This script will import the IAM group and policies into your Terraform state.
+
+4. **Apply the Terraform Configuration**:
    ```bash
    terraform apply
    ```
-   This command will create the IAM group, attach policies, and set up the ECR repository.
+   This command will create the IAM group, attach policies, and set up the ECR repository if they do not already exist.
 
-4. **Integrate with GitHub Actions**:
+5. **Integrate with GitHub Actions**:
    Use the IAM role and policies created by Terraform in your GitHub Actions workflow to build, push, and test Docker images in your ECR repository.
 
 ### GitHub Actions Workflow
@@ -73,7 +85,29 @@ The `.github/workflows/ecr.yml` file provides a GitHub Actions workflow that:
 
 - Update the IAM role ARN, region, and other secrets as required in your GitHub Actions workflow file.
 - Customize the Terraform variables if you need to change the default settings.
+- Ensure that the `terraform-import.sh` script is configured with correct resource identifiers.
 
 ---
 
 By using this setup, you can automate the deployment of Docker images to AWS ECR via GitHub Actions, ensuring a consistent and secure CI/CD pipeline.
+
+### `terraform-import.sh`
+
+You may want to create a `terraform-import.sh` script with the following content to handle the import of existing resources:
+
+```bash
+#!/bin/bash
+
+# Replace <account-id> with your AWS account ID
+
+terraform import aws_iam_group.github_actions_group github-actions-group
+terraform import aws_iam_policy.ecr_policy arn:aws:iam::<account-id>:policy/gha-ecr-policy
+terraform import aws_iam_policy.assuming_policy arn:aws:iam::<account-id>:policy/gha-assuming-policy
+terraform import aws_iam_policy.trust_policy arn:aws:iam::<account-id>:policy/gha-trust-policy
+```
+
+Make sure to make this script executable with:
+
+```bash
+chmod +x terraform-import.sh
+```
