@@ -56,21 +56,12 @@ resource "aws_iam_group_policy_attachment" "trust_policy_attachment" {
   policy_arn = coalesce(aws_iam_policy.trust_policy.arn, data.aws_iam_policy.existing_trust_policy.arn)
 }
 
-resource "null_resource" "create_ecr_repository" {
+resource "null_resource" "list_ecr_images" {
   provisioner "local-exec" {
     command = <<EOT
-      aws ecr describe-repositories --repository-names platform-mvp-ecr || \
-      aws ecr create-repository --repository-name platform-mvp-ecr
+      aws ecr list-images --repository-name platform-mvp-ecr --query 'imageIds[*]' --output json | \
+      jq -c '.[]'
     EOT
   }
 }
 
-resource "null_resource" "delete_ecr_images" {
-  provisioner "local-exec" {
-    command = <<EOT
-      aws ecr list-images --repository-name platform-mvp-ecr --query 'imageIds[*]' --output json | \
-      jq -c '.[]' | \
-      xargs -I {} aws ecr batch-delete-image --repository-name platform-mvp-ecr --image-ids {}
-    EOT
-  }
-}
