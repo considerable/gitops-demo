@@ -59,9 +59,10 @@ jobs:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          aws ecr list-images --repository-name $ECR_REPOSITORY --filter "tagStatus=TAGGED" --query 'imageIds[?imageTag!=`latest`]' --output json | \
-          jq -c '.[] | {"imageDigest": .imageDigest, "imageTag": .imageTag} | @json' | \
-          xargs -I {} aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids "{}"
+          images=$(aws ecr list-images --repository-name $ECR_REPOSITORY --filter "tagStatus=TAGGED" --query 'imageIds[?imageTag!=`latest`]' --output json)
+          for image in $(echo "$images" | jq -c '.[]'); do
+            aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids "$image"
+          done
 
       - name: Post-deployment steps (optional)
         run: |
