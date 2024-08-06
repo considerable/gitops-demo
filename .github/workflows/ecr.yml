@@ -30,29 +30,23 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and push multi-architecture Docker image
+      - name: Build, push, and test Docker image
         env:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           cd ECR/app
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          IMAGE_NAME="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:$SHORT_SHA"
-          echo "Building image with tags: ${IMAGE_NAME} and latest"
-          docker buildx build --platform linux/amd64,linux/arm64 -t $IMAGE_NAME -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:$SHORT_SHA --push .
-
-      - name: Debug Image Name
-        run: |
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          IMAGE_NAME="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${SHORT_SHA}"
           echo "SHORT_SHA=${SHORT_SHA}"
           echo "IMAGE_NAME=${IMAGE_NAME}"
 
-      - name: Pull and run Docker image for testing
-        env:
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          docker pull "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${SHORT_SHA}"
-          docker run -d -p 8080:8080 --name test-container "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest"
+          # Build and push the Docker image
+          docker buildx build --platform linux/amd64,linux/arm64 -t $IMAGE_NAME -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest --push .
+
+          # Pull and run the Docker image for testing
+          docker pull $IMAGE_NAME
+          docker run -d -p 8080:8080 --name test-container $IMAGE_NAME
           sleep 10 # Increase sleep duration to give the container more time to start
           docker logs test-container # Check container logs for debugging
           curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/ping | grep -q "200" && echo "Test Passed!" || { echo "Test Failed!"; exit 1; }
@@ -71,6 +65,5 @@ jobs:
 
       - name: Post-deployment steps (optional)
         run: |
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
           echo "Docker images have been successfully pushed to ECR with tags ${SHORT_SHA} and latest."
-
