@@ -1,7 +1,4 @@
 flowchart TD
-  B[GitHub Actions Workflow] -->|GitHub Secrets| C[Check ECR Repository]
-  C -->|Exists| D[Build Docker Image]
-  C -->|"Doesn't Exist"| E[Create ECR Repository]
-  E --> D
-  D -->|Push Image to ECR| F[ECR Repository with Image]
-
+  A[Terraform] -->|Create ECR Repository| B[ECR Repository]
+  D[GitHub Workflow]  -->|GitHub Secrets| F[Build Docker Image]
+  F -->|Push Image to ECR| C[ECR Repository with Image]
