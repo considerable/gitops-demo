@@ -53,18 +53,18 @@ jobs:
           docker stop test-container
           docker rm test-container
 
-      - name: Remove previous ECR images
+      - name: List previous ECR images
         if: success()
         env:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           images=$(aws ecr list-images --repository-name $ECR_REPOSITORY --filter "tagStatus=TAGGED" --query 'imageIds[?imageTag!=`latest`]' --output json)
-          for image in $(echo "$images" | jq -c '.[]'); do
-            aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids "$image"
-          done
+          echo "Listing all images except the latest:"
+          echo "$images" | jq -c '.[]'
 
       - name: Post-deployment steps (optional)
         run: |
           SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
           echo "Docker images have been successfully pushed to ECR with tags ${SHORT_SHA} and latest."
+
