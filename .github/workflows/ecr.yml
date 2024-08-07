@@ -10,17 +10,20 @@ jobs:
 
   analyze:
     runs-on: ubuntu-latest
-    permissions:
-      security-events: write
+    #permissions:
+    #  security-events: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4  # Update to the latest version
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3  # Update to the latest version
         with:
           languages: python
+          github-auth: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
