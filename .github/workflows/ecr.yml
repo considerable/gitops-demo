@@ -23,6 +23,7 @@ jobs:
         uses: github/codeql-action/init@v3  # Update to the latest version
         with:
           languages: python
+          source-root: /app
           github-auth: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Perform CodeQL Analysis
