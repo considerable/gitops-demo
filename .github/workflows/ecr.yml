@@ -13,26 +13,19 @@ jobs:
     permissions:
       contents: read
       security-events: write
-
-    env:
-      ACTIONS_RUNNER_DEBUG: true
-      ACTIONS_STEP_DEBUG: true
-
+    #env:
+    #  ACTIONS_RUNNER_DEBUG: true
+    #  ACTIONS_STEP_DEBUG: true
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: 'python'
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: python
-          source-root: .
-          github-auth: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
 
   build-and-push:
     runs-on: ubuntu-latest
