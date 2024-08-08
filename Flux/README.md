@@ -1,19 +1,22 @@
-# Kubernetes All-in-One Setup with Terraform, Ansible, and Flux
+# Kubernetes Cluster Setup with Terraform, Ansible, and Flux
 
-This repository contains code to set up an all-in-one Kubernetes cluster on a t3.micro instance using Terraform, configure it with Ansible, and deploy a container app from ECR using Flux.
+This repository contains code to set up a Kubernetes cluster on AWS using Terraform, configure it with Ansible, and deploy a container app from ECR using Flux. The cluster consists of two `t2.micro` instances: one as the controller and one as the worker node.
 
 ## Steps
 
 1. **Terraform Deployment**
-   - Deploy a t3.micro instance with the necessary security groups and networking.
+   - Deploy two `t2.micro` instances with the necessary security groups and networking:
+     - One instance for the Kubernetes controller node.
+     - One instance for the Kubernetes worker node.
 
 2. **Ansible Configuration**
-   - Install Docker and Kubernetes components.
-   - Initialize the Kubernetes cluster.
-   - Install the Flannel network plugin.
+   - Install Docker and Kubernetes components on both instances.
+   - Initialize the Kubernetes cluster on the controller node.
+   - Join the worker node to the Kubernetes cluster.
+   - Install the Flannel network plugin across the cluster.
 
 3. **Flux Deployment**
-   - Set up Flux to monitor a Git repository and deploy the container app from ECR.
+   - Set up Flux to monitor a Git repository and deploy the container app from ECR to the Kubernetes cluster.
 
 ## Prerequisites
 
@@ -33,7 +36,7 @@ terraform apply
 
 ### Ansible
 
-Update the `hosts` file with the IP address of your instance.
+Update the `hosts` file with the IP addresses of your controller and worker instances.
 
 ```sh
 ansible-playbook -i hosts setup-playbook.yml
@@ -41,7 +44,7 @@ ansible-playbook -i hosts setup-playbook.yml
 
 ### Flux
 
-Apply the Flux configuration.
+Apply the Flux configuration to manage deployments on the Kubernetes cluster.
 
 ```sh
 kubectl apply -f flux.yaml
@@ -51,7 +54,8 @@ kubectl apply -f flux.yaml
 
 ```mermaid
 graph TD;
-    A[Terraform] -->|Provision t3.micro Instance| B[Ansible]
+    A[Terraform] -->|Provision t2.micro Controller Node| B[Ansible]
+    A -->|Provision t2.micro Worker Node| B
     B -->|Install Docker & Kubernetes| C[Flux]
     B -->|Initialize Kubernetes Cluster| C
     B -->|Install Flannel Network Plugin| C
@@ -60,4 +64,6 @@ graph TD;
 
 ## Conclusion
 
-This setup demonstrates how to deploy a Kubernetes cluster on AWS using Terraform, configure it with Ansible, and manage deployments with Flux.
+This setup demonstrates how to deploy a Kubernetes cluster on AWS with one controller and one worker node using Terraform, configure it with Ansible, and manage deployments with Flux.
+
+
