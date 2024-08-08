@@ -51,13 +51,11 @@ kubectl apply -f flux.yaml
 
 ```mermaid
 graph TD;
-    A[Terraform] --> B[Provision t3.micro Instance];
-    B --> C[Ansible];
-    C --> D[Install Docker & Kubernetes];
-    D --> E[Initialize Kubernetes Cluster];
-    E --> F[Install Flannel Network Plugin];
-    F --> G[Flux];
-    G --> H[Deploy Container App from ECR];
+    A[Terraform] -->|Provision t3.micro Instance| B[Ansible]
+    B -->|Install Docker & Kubernetes| C[Flux]
+    B -->|Initialize Kubernetes Cluster| C
+    B -->|Install Flannel Network Plugin| C
+    C -->|Deploy Container App from ECR| D[API Backend]
 ```
 
 ## Conclusion
