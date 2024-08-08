@@ -54,12 +54,14 @@ kubectl apply -f flux.yaml
 
 ```mermaid
 graph TD;
-    A[Terraform] -->|Provision t2.micro Controller Node| B[Ansible]
-    A -->|Provision t2.micro Worker Node| B
+    A[Terraform] -->|Provision VPC, Subnets, Security Groups| VPC[VPC]
+    VPC -->|Provision t2.micro Controller Node| B[Ansible]
+    VPC -->|Provision t2.micro Worker Node| B
     B -->|Install Docker & Kubernetes| C[Flux]
     B -->|Initialize Kubernetes Cluster| C
     B -->|Install Flannel Network Plugin| C
     C -->|Deploy Container App from ECR| D[API Backend]
+    C -->|Configure GitOps with Flux| E[GitOps]
 ```
 
 ## Conclusion
