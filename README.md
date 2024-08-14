@@ -1,4 +1,3 @@
-# aws-idp-mini-ra
 AWS Internal Developer Platform (IDP) mini Reference Architecture
 
 ```mermaid
