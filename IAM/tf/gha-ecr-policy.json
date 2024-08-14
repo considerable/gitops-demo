@@ -9,7 +9,7 @@
         "ecr:ListImages",
         "ecr:DescribeRepositories"
       ],
-      "Resource": "arn:aws:ecr::757996166630:repository/platform-mvp-ecr"
+      "Resource": "arn:aws:ecr::${aws_account_id}:repository/platform-mvp-ecr"
     }
   ]
 }

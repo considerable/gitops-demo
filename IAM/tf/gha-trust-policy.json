@@ -7,8 +7,7 @@
         "sts:AssumeRole",
         "sts:TagSession"
       ],
-      "Resource": "arn:aws:iam::757996166630:role/github-actions-role"
+      "Resource": "arn:aws:iam::${aws_account_id}:role/github-actions-role"
     }
   ]
 }
-
