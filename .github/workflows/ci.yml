@@ -79,6 +79,32 @@ jobs:
           echo "SHORT_SHA=${SHORT_SHA}"
           echo "IMAGE_NAME=${IMAGE_NAME}"
 
+      - name: Delete all existing ECR images - first delete the manifest lists and then delete the original images
+        #if: success()
+        env:
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ACTIONS_RUNNER_DEBUG: true
+          ACTIONS_STEP_DEBUG: true
+        run: echo "This is a placeholder step that does nothing."
+        #run: |
+        #  images=$(aws ecr list-images --repository-name $ECR_REPOSITORY --output json)
+        #  echo "Deleting all existing ECR images:"
+        #  echo "$images" | jq -c '.[]'
+        #  for image in $(echo "$images" | jq -c '.[]'); do
+        #    imageDigest=$(echo $image | jq -r '.imageDigest')
+        #    manifestList=$(aws ecr describe-images --repository-name $ECR_REPOSITORY --image-ids imageDigest=$imageDigest --query 'imageDetails[0].imageManifest' --output text)
+        #    if [[ $manifestList == *"application/vnd.docker.distribution.manifest.list.v2+json"* ]]; then
+        #      echo "Deleting manifest list: $imageDigest"
+        #      aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids imageDigest=$imageDigest
+        #    fi
+        #  done
+        #  for image in $(echo "$images" | jq -c '.[]'); do
+        #    imageDigest=$(echo $image | jq -r '.imageDigest')
+        #    echo "Deleting image: $imageDigest"
+        #    aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids imageDigest=$imageDigest
+        #  done
+
           # Build and push the Docker image
           docker buildx build --platform linux/amd64,linux/arm64 -t $IMAGE_NAME -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest --push .
 
@@ -90,20 +116,6 @@ jobs:
           curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/ping | grep -q "200" && echo "Test Passed!" || { echo "Test Failed!"; exit 1; }
           docker stop test-container
           docker rm test-container
-
-      - name: Delete previous ECR images
-        if: success()
-        env:
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          images=$(aws ecr list-images --repository-name $ECR_REPOSITORY --filter "tagStatus=TAGGED" --query 'imageIds[?imageTag!=`latest`]' --output json)
-          echo "Deleting all images except the latest:"
-          echo "$images" | jq -c '.[]'
-          for image in $(echo "$images" | jq -c '.[]'); do
-            imageDigest=$(echo $image | jq -r '.imageDigest')
-            aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids imageDigest=$imageDigest
-          done
 
       - name: Post-deployment steps (optional)
         run: |
