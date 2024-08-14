@@ -68,30 +68,30 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Clean ECR - the manifest lists and the original images
-        # if: success()
+        if: success()
         env:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           ACTIONS_RUNNER_DEBUG: true
           ACTIONS_STEP_DEBUG: true
-        run: echo "This is a placeholder step that does nothing."
-        # run: |
-        #   images=$(aws ecr list-images --repository-name $ECR_REPOSITORY --output json)
-        #   echo "Deleting all existing ECR images:"
-        #   echo "$images" | jq -c '.[]'
-        #   for image in $(echo "$images" | jq -c '.[]'); do
-        #     imageDigest=$(echo $image | jq -r '.imageDigest')
-        #     manifestList=$(aws ecr describe-images --repository-name $ECR_REPOSITORY --image-ids imageDigest=$imageDigest --query 'imageDetails[0].imageManifest' --output text)
-        #     if [[ $manifestList == *"application/vnd.docker.distribution.manifest.list.v2+json"* ]]; then
-        #       echo "Deleting manifest list: $imageDigest"
-        #       aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids imageDigest=$imageDigest
-        #     fi
-        #   done
-        #   for image in $(echo "$images" | jq -c '.[]'); do
-        #     imageDigest=$(echo $image | jq -r '.imageDigest')
-        #     echo "Deleting image: $imageDigest"
-        #     aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids imageDigest=$imageDigest
-        #   done
+        #run: echo "This is a placeholder step that does nothing."
+        run: |
+          images=$(aws ecr list-images --repository-name $ECR_REPOSITORY --output json)
+          echo "Deleting all existing ECR images:"
+          echo "$images" | jq -c '.[]'
+          for image in $(echo "$images" | jq -c '.[]'); do
+            imageDigest=$(echo $image | jq -r '.imageDigest')
+            manifestList=$(aws ecr describe-images --repository-name $ECR_REPOSITORY --image-ids imageDigest=$imageDigest --query 'imageDetails[0].imageManifest' --output text)
+            if [[ $manifestList == *"application/vnd.docker.distribution.manifest.list.v2+json"* ]]; then
+              echo "Deleting manifest list: $imageDigest"
+              aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids imageDigest=$imageDigest
+            fi
+          done
+          for image in $(echo "$images" | jq -c '.[]'); do
+            imageDigest=$(echo $image | jq -r '.imageDigest')
+            echo "Deleting image: $imageDigest"
+            aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids imageDigest=$imageDigest
+          done
 
       - name: Build, push, and test Docker image
         env:
