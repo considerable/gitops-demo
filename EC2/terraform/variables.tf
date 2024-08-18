@@ -22,8 +22,3 @@ variable "ami_id" {
   description = "AMI ID"
   type        = string
 }
-
-variable "my_public_ip" {
-  description = "Public IP address of the user"
-  type        = string
-}
