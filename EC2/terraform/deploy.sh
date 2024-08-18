@@ -14,11 +14,6 @@ fi
 # Export the AWS_ACCOUNT_ID to ensure Terraform picks it up
 export TF_VAR_aws_account_id=$AWS_ACCOUNT_ID
 
-## Fetch the latest Amazon Linux 2 AMI ID
-#AMI_ID=$(aws ec2 describe-images --region "$REGION" \
-#  --filters "Name=name,Values=amzn2-ami-hvm-*-x86_64-gp2" \
-#  --query "Images | sort_by(@, &CreationDate) | [-1].ImageId" --output text)
-
 ## Retrieve the latest Amazon Linux 2023 AMI ID with the SSM Agent preinstalled.
 AMI_ID=$(aws ssm get-parameters --region "$REGION" \
   --names /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 \
@@ -57,4 +52,4 @@ WORKER_PUBLIC_IP=$(terraform output -raw worker_public_ip)
 # Display the SSH access instructions
 echo "You can access your EC2 instances via SSH using the following commands:"
 echo "Controller: ssh -i ~/.ssh/${SSH_KEY_NAME}.pem ec2-user@${CONTROLLER_PUBLIC_IP}"
-echo "Worker: ssh -i ~/.ssh/${SSH_KEY_NAME}.pem ec2-user@${WORKER_PUBLIc_ip}"
+echo "Worker: ssh -i ~/.ssh/${SSH_KEY_NAME}.pem ec2-user@${WORKER_PUBLIC_IP}"
