@@ -1,0 +1,10 @@
+---
+- name: Debug join command
+  debug:
+    var: "{{ hostvars['master']['kubeadm_init']['stdout_lines'] | select('search', 'kubeadm join') | list | first }}"
+
+- name: Join Kubernetes cluster
+  shell: "{{ hostvars['master']['kubeadm_init']['stdout_lines'] | select('search', 'kubeadm join') | list | first | replace('master-ip', hostvars['master'].ansible_host) }}"
+  args:
+    executable: /bin/bash
+  become: true

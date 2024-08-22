@@ -1,0 +1,64 @@
+---
+- name: Update and upgrade apt packages
+  apt:
+    update_cache: yes
+    upgrade: dist
+
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+
+- name: Create directory for apt keyrings
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Add Kubernetes apt repository GPG key
+  shell: >
+    curl -fsSL https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/Release.key |
+    gpg --yes --dearmor -o /etc/apt/keyrings/k8s.gpg
+
+- name: Ensure the GPG key is readable
+  file:
+    path: /etc/apt/keyrings/k8s.gpg
+    state: file
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add Kubernetes apt repository
+  lineinfile:
+    path: /etc/apt/sources.list.d/k8s.list
+    line: "deb [signed-by=/etc/apt/keyrings/k8s.gpg] https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/ /"
+    create: yes
+
+- name: Update apt package index
+  apt:
+    update_cache: yes
+
+- name: Install Kubernetes packages
+  apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: yes
+
+- name: Hold Kubernetes packages
+  shell: |
+    apt-mark hold kubelet kubeadm kubectl
+
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Ensure swap is disabled on boot
+  mount:
+    name: none
+    src: swap
+    fstype: swap
+    opts: sw
+    state: absent

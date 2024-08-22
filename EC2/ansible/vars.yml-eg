@@ -1,0 +1,7 @@
+---
+# Kubernetes version to install
+kubernetes_version: "1.30"
+
+# Private IPs of the EC2 instances
+k8s_master_private_ip: "<master_private_ip>"
+k8s_worker_private_ip: "<worker_private_ip>"

@@ -1,6 +1,5 @@
-[K8s-Controller]
-controller ansible_host=<controller_public_ip> ansible_user=ec2-user ansible_ssh_private_key_file="${HOME}/.ssh/k8s-mvp.pem"
+[K8s-Master]
+master_public ansible_host=<master_public_ip> ansible_user=ubuntu ansible_ssh_private_key_file="${HOME}/.ssh/k8s-mvp.pem"
 
 [K8s-Worker]
-controller ansible_host=<worker_public_ip> ansible_user=ec2-user ansible_ssh_private_key_file="${HOME}/.ssh/k8s-mvp.pem"
-
+worker_public ansible_host=<worker_public_ip> ansible_user=ubuntu ansible_ssh_private_key_file="${HOME}/.ssh/k8s-mvp.pem"

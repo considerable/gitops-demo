@@ -155,17 +155,17 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
   role = aws_iam_role.ec2_role.name
 }
 
-# Create EC2 Instance for Controller
-resource "aws_instance" "controller" {
+# Create EC2 Instance for Master
+resource "aws_instance" "master" {
   ami                    = var.ami_id
-  instance_type          = "t2.micro"
+  instance_type          = "t3.small"
   subnet_id              = aws_subnet.k8s_subnet.id
   key_name               = var.key_name
   iam_instance_profile   = aws_iam_instance_profile.ec2_instance_profile.name
   associate_public_ip_address = true  # Ensure public IP is assigned
 
   tags = {
-    Name = "K8s-Controller"
+    Name = "K8s-Master"
   }
 
   vpc_security_group_ids = [aws_security_group.k8s_security_group.id]
@@ -200,7 +200,7 @@ resource "aws_instance" "controller" {
 # Create EC2 Instance for Worker
 resource "aws_instance" "worker" {
   ami                    = var.ami_id
-  instance_type          = "t2.micro"
+  instance_type          = "t3.small"
   subnet_id              = aws_subnet.k8s_subnet.id
   key_name               = var.key_name
   iam_instance_profile   = aws_iam_instance_profile.ec2_instance_profile.name

@@ -1,100 +1,27 @@
 ---
-- hosts: all
+- name: Setup Kubernetes Cluster
+  hosts: all
   become: yes
-  tasks:
-    - name: Disable swap
-      command: swapoff -a
-      ignore_errors: yes
+  vars_files:
+    - vars.yml
+  roles:
+    - role: common
+      tags: common
 
-    - name: Disable swap in fstab
-      replace:
-        path: /etc/fstab
-        regexp: '^\s*([^#\s]+\s+)\s+swap\s+'
-        replace: '#\1swap'
-
-    - name: Install required packages
-      dnf:
-        name: ['dnf-utils', 'device-mapper-persistent-data', 'lvm2']
-        state: present
-        update_cache: yes
-
-    - name: Install containerd
-      dnf:
-        name: containerd
-        state: present
-        update_cache: yes
-
-    - name: Start and enable containerd
-      service:
-        name: containerd
-        state: started
-        enabled: yes
-
-    - name: Add Kubernetes repository
-      copy:
-        dest: /etc/yum.repos.d/kubernetes.repo
-        content: |
-          [kubernetes]
-          name=Kubernetes
-          baseurl=https://pkgs.k8s.io/core:/stable:/v1.29/yum/
-          enabled=1
-          gpgcheck=1
-          repo_gpgcheck=1
-          gpgkey=https://pkgs.k8s.io/core:/stable:/v1.29/yum/RPM-GPG-KEY-kubernetes
-
-    - name: Verify Kubernetes repository
-      command: dnf repolist all
-      register: repo_list
-
-    - name: Debug repository list
-      debug:
-        var: repo_list.stdout_lines
-
-    - name: Install Kubernetes packages
-      dnf:
-        name: ['kubelet', 'kubeadm', 'kubectl']
-        state: present
-        update_cache: yes
-
-    - name: Enable and start kubelet
-      service:
-        name: kubelet
-        state: started
-        enabled: yes
-
-- hosts: K8s-Controller
+- name: Setup Kubernetes Master
+  hosts: master_public
   become: yes
-  tasks:
-    - name: Initialize Kubernetes cluster
-      command: kubeadm init --pod-network-cidr=10.244.0.0/16
-      register: init_result
-      ignore_errors: yes
+  vars_files:
+    - vars.yml
+  roles:
+    - role: master
+      tags: master
 
-    - name: Create .kube directory
-      file:
-        path: /root/.kube
-        state: directory
-        mode: 0700
-
-    - name: Copy admin.conf to .kube/config
-      copy:
-        src: /etc/kubernetes/admin.conf
-        dest: /root/.kube/config
-        remote_src: yes
-
-    - name: Install Flannel network plugin
-      command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-      environment:
-        KUBECONFIG: /root/.kube/config
-
-    - name: Get join command
-      command: kubeadm token create --print-join-command
-      register: join_command
-      ignore_errors: yes
-
-- hosts: K8s-Worker
+- name: Setup Kubernetes Worker
+  hosts: worker_public
   become: yes
-  tasks:
-    - name: Join Kubernetes cluster
-      command: "{{ hostvars['K8s-Controller'].join_command.stdout }}"
-      ignore_errors: yes
+  vars_files:
+    - vars.yml
+  roles:
+    - role: worker
+      tags: worker
