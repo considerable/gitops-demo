@@ -1,0 +1,21 @@
+# .gitattributes
+
+*.md linguist-documentation=Markdown
+*.mmd linguist-language=Mermaid
+
+*.py linguist-language=Python
+
+Dockerfile linguist-language=Dockerfile
+
+*.ini linguist-language=Ansible
+*.ini-eg linguist-language=Ansible
+*.yml linguist-language=Ansible
+*.yml-eg linguist-language=Ansible
+*.yaml linguist-language=Ansible
+
+*.hcl linguist-language=HCL
+*.tf linguist-language=HCL
+*.tfvars linguist-language=HCL
+
+*.sh linguist-language=Shell
+
