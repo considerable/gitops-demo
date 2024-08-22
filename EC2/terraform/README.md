@@ -5,12 +5,24 @@ This setup provisions two EC2 instances using Terraform, configures them to use 
 ### Directory Structure
 
 ```plaintext
-EC2/
-├── README.md
-├── ansible/
-│   ├── inventory.ini
-│   └── playbook.yml
-└── terraform/
+../../EC2
+├── ansible
+│   ├── README.md
+│   ├── inventory.ini-eg
+│   ├── playbook.yml
+│   ├── roles
+│   │   ├── common
+│   │   │   └── tasks
+│   │   │       └── main.yml
+│   │   ├── master
+│   │   │   └── tasks
+│   │   │       └── main.yml
+│   │   └── worker
+│   │       └── tasks
+│   │           └── main.yml
+│   └── vars.yml-eg
+└── terraform
+    ├── README.md
     ├── deploy.sh
     ├── main.tf
     ├── outputs.tf
@@ -66,3 +78,4 @@ Terraform will provide the following outputs:
 
 - SSH into the controller node using the public IP provided by Terraform.
 - Use `kubectl` to interact with the Kubernetes cluster.
+
