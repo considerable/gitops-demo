@@ -272,5 +272,5 @@ flowchart TB
 - **Monitoring and Logging Plane**:
   - Provides tools for collecting, storing, and analyzing logs, metrics, and traces from applications and infrastructure. This abstraction helps developers and operators understand application performance, troubleshoot issues, and ensure compliance with SLAs without managing the underlying monitoring infrastructure.
 
-- **Secrets & Identity Management**:
-  - Manages sensitive information like API keys, credentials, and certificates, as well as identities for both humans and services within the platform. This plane ensures secure access control, secrets rotation, and compliance with security policies, abstracting the complexity of security management from the developer.
+- **Security Plane**:
+  - Security Plane (Secrets & Identity Management) Manages sensitive information like API keys, credentials, and certificates, as well as identities for both humans and services within the platform. This plane ensures secure access control, secrets rotation, and compliance with security policies, abstracting the complexity of security management from the developer.
