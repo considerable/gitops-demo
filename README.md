@@ -3,11 +3,13 @@ Kubernetes in Docker (Kind) is the Only Infrastructure Knowledge Developers Need
 
 ## Overview
 
-A brief description of your project, outlining its purpose and functionality.
+This project serves as a practical exploration, guiding you from developing a prototype application on your local workstation to deploying a production-ready service in the cloud, all while adhering to the principles of an Internal Developer Platform (IDP) mini Reference Architecture.
 
 ## Prerequisites
 
-- List of prerequisites for development or deployment.
+- Docker
+- Kind (Kubernetes for Docker)
+- Contanerized Application
 
 ## Setup
 
@@ -16,12 +18,6 @@ A brief description of your project, outlining its purpose and functionality.
 
 2. **Deployment**
    - Steps for deploying the application in various environments.
-
-## Architecture Overview
-
-A high-level description of the system architecture.
-
-![](k8s-kind.png)
 
 ## Deployment Scenarios
 
