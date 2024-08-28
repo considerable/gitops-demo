@@ -11,14 +11,6 @@ This project serves as a practical exploration, guiding you from developing a pr
 - Kind (Kubernetes for Docker)
 - Contanerized Application
 
-## Setup
-
-1. **Local Development**
-   - Instructions for setting up the environment locally.
-
-2. **Deployment**
-   - Steps for deploying the application in various environments.
-
 ## Deployment Scenarios
 
 ### 1) It works on my PC
